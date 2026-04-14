@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>글로바 현장 출석 & 자동 배정기</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      /* 토스 표준 컬러 정의 */
+      --toss-blue: #aed630;
+      --toss-blue-press: #84cc16;
+      --text-black: #191f28;
+      --text-grey: #4e5968;
+      --text-light: #8b95a1;
+      --input-bg: #F9FBFA; /* 채워진 입력창 배경 */
+      --bg-color: #ffffff;
+      --line-color: #F9FBFA;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
+    
+    body { 
+      background-color: #e5e8eb; /* 토스 앱 배경색 */
+      margin: 0; 
+      display: flex; 
+      justify-content: center; 
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    /* 앱 프레임 컨테이너 */
+    .app-container { 
+      width: 100%;
+      max-width: 700px; /* 로그인/회원가입보다 약간 넓게 (그리드 배치용) */
+      background: var(--card); 
+      border-radius: 30px; /* 둥근 모서리 */
+      padding: 40px 30px; 
+      background-color: white;
+      box-shadow: var(--card-shadow); 
+    }
+    
+    h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; color: var(--text-black); text-align: center;}
+    .subtitle { font-size: 15px; color: var(--text-grey); margin-bottom: 30px; text-align: center; line-height: 1.5;}
+    
+    .grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 30px; }
+    
+    /* 패널 타이틀 */
+    .panel-title { 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: var(--text-grey);
+      margin-bottom: 12px; 
+      margin-left: 4px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    
+    /* 좌측: 사전 신청자 체크리스트 */
+    .check-list-panel {
+        background-color: white;
+        border-radius: 20px;
+        /* 내부 리스트를 감싸는 영역 */
+    }
+
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding: 4px; }
+    
+    /* [토스 스타일] 체크 아이템: 테두리 없이 배경색으로 구분 */
+    .check-item { 
+      background-color: var(--input-bg); 
+      padding: 16px; 
+      border-radius: 16px; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      cursor: pointer; 
+      transition: 0.2s;
+    }
+    .check-item:active { background-color: #e8ebed; }
+    
+    /* 커스텀 체크박스 */
+    .check-item input[type="checkbox"] { 
+      width: 22px; 
+      height: 22px; 
+      accent-color: var(--toss-blue); /* 토스 블루 적용 */
+      cursor: pointer; 
+      border-radius: 6px;
+    }
+    
+    /* 우측: 현장 접수 & 컨트롤 */
+    .control-panel {
+        background-color: white;
+        border-radius: 20px;
+    }
+
+    /* [토스 스타일] 입력 필드 공통 */
+    .toss-input {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      background-color: var(--input-bg);
+      font-size: 16px;
+      color: var(--text-black);
+      outline: none;
+      transition: background-color 0.2s;
+    }
+    .toss-input:focus { background-color: #e8ebed; }
+    
+    /* 현장 접수 폼 */
+    .walk-in-form { display: flex; gap: 10px; margin-bottom: 12px; }
+    .walk-in-form input { flex: 2; }
+    .walk-in-form select { 
+        flex: 1; 
+        appearance: none; /* 커스텀 화살표 */
+        -webkit-appearance: none;
+        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b95a1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+        background-repeat: no-repeat;
+        background-position: right 14px top 50%;
+        background-size: 10px auto;
+    }
+    
+    /* 현장 추가 버튼 */
+    #addWalkInBtn { 
+        padding: 0 16px; 
+        background: var(--text-black); 
+        color: white; 
+        border: none; 
+        border-radius: 14px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        font-size: 14px;
+    }
+
+    /* 현장 접수자 태그 리스트 */
+    .walk-in-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; min-height: 30px;}
+    .walk-in-tag { background: var(--input-bg); padding: 8px 14px; border-radius: 999px; font-size: 14px; display: flex; align-items: center; gap: 8px; font-weight: 500;}
+    .walk-in-tag button { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 2px;}
+
+    /* 설정 행 */
+    .setting-group { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .control-row { 
+        display:flex; 
+        justify-content: space-between; 
+        align-items:center; 
+        background: var(--input-bg); 
+        padding: 14px 16px; 
+        border-radius: 16px; 
+    }
+    .control-row label { font-size: 15px; font-weight: 600; color: var(--text-grey);}
+    .control-row input { 
+        width: 60px; 
+        padding: 8px; 
+        text-align: center; 
+        border: none; 
+        border-radius: 8px; 
+        font-size: 16px; 
+        font-weight: 700; 
+        color: var(--toss-blue);
+        background: white; /* 입력값 도드라지게 */
+    }
+
+    /* [토스 스타일] 메인 배정 버튼: 꽉 차고 파란색 */
+    .btn-assign { 
+        width: 100%; 
+        padding: 18px; 
+        background-color: var(--toss-blue); 
+        color: white; 
+        border: none; 
+        border-radius: 16px; 
+        font-size: 17px; 
+        font-weight: 700; 
+        cursor: pointer; 
+        transition: background-color 0.2s; 
+        margin-top: 15px;
+    }
+    .btn-assign:active { background-color: var(--toss-blue-press); }
+
+    /* 결과 출력 영역 */
+    .result { margin-top: 40px; border-top: 2px dashed #e5e8eb; padding-top: 30px; }
+    .result-header { font-size: 20px; font-weight: 800; margin-bottom: 25px; color: var(--text-black); text-align: center; line-height: 1.4;}
+    
+    /* 테이블 그리드 배치 */
+    .tables { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    
+    /* 테이블 카드 스타일 */
+    .table-card { 
+        background-color: white; 
+        border-radius: 20px; 
+        padding: 20px; 
+        border: 1px solid var(--line-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .table-title { font-size: 16px; font-weight: 800; margin-bottom: 16px; color: var(--toss-blue); text-align: center; }
+    
+    .member-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .member-list li { font-size: 15px; display: flex; align-items: center; justify-content: space-between;}
+    .member-info { display: flex; align-items: center; } /* 뱃지와 이름 묶음 */
+
+    /* 레벨 뱃지 스타일 (토스 스타일로 더 선명하게) */
+    .lvl-badge { font-size: 11px; padding: 3px 7px; border-radius: 6px; font-weight: 700; margin-right: 10px; }
+    .lvl-고급 { background: #fee2e2; color: #b91c1c; }
+    .lvl-중급 { background: #fef3c7; color: #b45309; }
+    .lvl-초급 { background: #dcfce7; color: #15803d; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1>현장 출석 & 자동 배정 🎲</h1>
+    <p class="subtitle">실제 온 사람만 체크하고, 현장 접수자를 추가하세요.<br>레벨을 고려해 최적의 조를 짜드립니다.</p>
+    
+    <div class="grid">
+      <div class="check-list-panel">
+        <div class="panel-title">
+          <span>사전 신청자</span>
+          <span style="font-size: 13px; font-weight: normal; color: var(--text-light);" id="dbCountText"></span>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(attendees)}" style="text-align:center; padding: 40px 0; color:var(--text-light); font-size: 14px; background: var(--input-bg); border-radius: 16px;">
+          신청자가 없습니다.
+        </div>
+        
+        <ul class="check-list" th:if="${not #lists.isEmpty(attendees)}">
+          <li th:each="m : ${attendees}">
+            <label class="check-item">
+              <input type="checkbox" class="db-member-chk" 
+                     th:value="${m.nickname}" 
+                     th:data-level="${m.level == null ? '초급' : m.level}" checked>
+              <span th:class="'lvl-badge lvl-' + (${m.level} == null ? '초급' : ${m.level})" 
+                    th:text="${m.level} == null ? '초급' : ${m.level}"></span>
+              <span style="font-weight: 600; color: var(--text-black);" th:text="${m.nickname}"></span>
+            </label>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="control-panel">
+        <div class="panel-title">현장 접수 (Walk-in)</div>
+        <div class="walk-in-form">
+          <input type="text" id="walkInName" class="toss-input" placeholder="이름 입력">
+          <select id="walkInLevel" class="toss-input">
+            <option value="초급">초급</option>
+            <option value="중급">중급</option>
+            <option value="고급">고급</option>
+          </select>
+          <button type="button" id="addWalkInBtn">추가</button>
+        </div>
+        <ul class="walk-in-list" id="walkInList">
+          </ul>
+
+        <div class="setting-group">
+            <div class="panel-title" style="margin: 0 0 4px 4px;">배정 설정</div>
+            <div class="control-row">
+              <label>테이블 갯수</label>
+              <input type="number" id="tableCount" min="1" value="5">
+            </div>
+            <div class="control-row">
+              <label>테이블당 인원</label>
+              <input type="number" id="tableSize" min="1" value="4">
+            </div>
+        </div>
+        
+        <button type="button" class="btn-assign" id="assignBtn">최종 인원으로 조 짜기</button>
+      </div>
+    </div>
+    
+    <div class="result" id="result" style="display:none;">
+      <div class="result-header" id="summary">배정 완료</div>
+      <div class="tables" id="tables"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- [JS 로직은 이전과 동일 (데이터 형태만 맞춤)] ---
+    
+    let walkInMembers = [];
+    const walkInNameInput = document.getElementById('walkInName');
+    const walkInLevelSelect = document.getElementById('walkInLevel');
+    const walkInListUI = document.getElementById('walkInList');
+
+    // 현장 접수자 추가
+    document.getElementById('addWalkInBtn').addEventListener('click', () => {
+      const name = walkInNameInput.value.trim();
+      if (!name) return;
+      
+      const level = walkInLevelSelect.value;
+      const member = { name: name, level: level, isWalkIn: true };
+      walkInMembers.push(member);
+      
+      renderWalkInList();
+      walkInNameInput.value = '';
+      walkInNameInput.focus();
+    });
+
+    // 엔터키 입력 시 추가
+    walkInNameInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') document.getElementById('addWalkInBtn').click();
+    });
+
+    // 현장 접수자 태그 그리기
+    function renderWalkInList() {
+      walkInListUI.innerHTML = '';
+      walkInMembers.forEach((m, idx) => {
+        const li = document.createElement('li');
+        li.className = 'walk-in-tag';
+        li.innerHTML = `
+          <span class="lvl-badge lvl-${m.level}">${m.level}</span> ${m.name}
+          <button onclick="removeWalkIn(${idx})">×</button>
+        `;
+        walkInListUI.appendChild(li);
+      });
+    }
+
+    // 현장 접수자 삭제
+    window.removeWalkIn = function(idx) {
+      walkInMembers.splice(idx, 1);
+      renderWalkInList();
+    }
+
+
+    // 피셔-예이츠 셔플
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i = a.length-1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // 레벨 밸런스 배정 알고리즘
+    function assignSeatsBalanced(membersArr, tableCount, tableSize){
+      const adv = shuffle(membersArr.filter(m => m.level === '고급'));
+      const inter = shuffle(membersArr.filter(m => m.level === '중급'));
+      const beg = shuffle(membersArr.filter(m => m.level === '초급'));
+
+      // 믹스 순서: 고급 -> 중급 -> 초급
+      const sortedMembers = [...adv, ...inter, ...beg];
+      const tables = Array.from({length: tableCount}, () => []);
+
+      let currentTable = 0;
+      for (const m of sortedMembers) {
+        let start = currentTable;
+        // 빈 자리 찾기
+        while(tables[currentTable].length >= tableSize) {
+          currentTable = (currentTable + 1) % tableCount;
+          if(currentTable === start) break; // 다 찼음
+        }
+        
+        if (tables[currentTable].length < tableSize) {
+          tables[currentTable].push(m);
+          currentTable = (currentTable + 1) % tableCount;
+        }
+      }
+      return tables;
+    }
+
+
+    // 최종 배정 버튼 클릭
+    document.getElementById('assignBtn').addEventListener('click', () => {
+      let finalMembers = [];
+
+      // 1. 체크된 DB 신청자 수집
+      document.querySelectorAll('.db-member-chk:checked').forEach(chk => {
+        finalMembers.push({ 
+          name: chk.value, 
+          level: chk.getAttribute('data-level'),
+          isWalkIn: false
+        });
+      });
+
+      // 2. 현장 접수자 합치기
+      finalMembers = finalMembers.concat(walkInMembers);
+
+      if(finalMembers.length === 0){ 
+        alert('배정할 인원이 없습니다. 참석자를 선택하거나 추가해주세요.'); 
+        return; 
+      }
+      
+      const tableCountInput = document.getElementById('tableCount');
+      let tableCount = Number(tableCountInput.value) || 1;
+      const tableSize = Number(document.getElementById('tableSize').value) || 1;
+
+      // 인원 대비 테이블 부족 시 자동 보정
+      const requiredTables = Math.ceil(finalMembers.length / tableSize);
+      if (tableCount < requiredTables) {
+        tableCount = requiredTables;
+        tableCountInput.value = tableCount; 
+      }
+
+      const tables = assignSeatsBalanced(finalMembers, tableCount, tableSize);
+      
+      // 통계 화면 출력
+      const advCount = finalMembers.filter(m => m.level === '고급').length;
+      const midCount = finalMembers.filter(m => m.level === '중급').length;
+      const begCount = finalMembers.filter(m => m.level === '초급').length;
+
+      document.getElementById('summary').innerHTML = 
+        `🎉 총 ${finalMembers.length}명 배정 완료<br>
+         <span style="font-size:14px; font-weight:normal; color:var(--text-grey); margin-top:8px; display:inline-block;">
+         (고급 ${advCount} / 중급 ${midCount} / 초급 ${begCount})</span>`;
+      
+      const tablesBox = document.getElementById('tables');
+      tablesBox.innerHTML = '';
+      
+      // 테이블 카드 생성
+      tables.forEach((t, i) => {
+        const card = document.createElement('div'); 
+        card.className = 'table-card';
+        
+        const title = document.createElement('div'); 
+        title.className = 'table-title'; 
+        title.textContent = `${i+1}번 조 (${t.length}명)`;
+        
+        const list = document.createElement('ul'); 
+        list.className = 'member-list';
+        
+        if(t.length === 0){ 
+          list.innerHTML = `<li style="color:var(--text-light); justify-content:center;">- 빈 조 -</li>`; 
+        } else { 
+          t.forEach((m) => { 
+            const li = document.createElement('li'); 
+            const walkInTag = m.isWalkIn ? `<span style="color:var(--toss-blue); font-size:12px; font-weight:600;">(현장)</span>` : '';
+            li.innerHTML = `
+                <div class="member-info">
+                    <span class="lvl-badge lvl-${m.level}">${m.level}</span>
+                    <span style="font-weight:600; color:var(--text-black);">${m.name}</span>
+                </div>
+                ${walkInTag}
+            `; 
+            list.appendChild(li); 
+          }); 
+        }
+        card.appendChild(title); 
+        card.appendChild(list); 
+        tablesBox.appendChild(card);
+      });
+      
+      document.getElementById('result').style.display = 'block';
+      
+      // 결과 영역으로 부드럽게 스크롤
+      setTimeout(() => {
+        document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    });
+
+    // 초기 인원수 표시
+    window.onload = function() {
+      const dbCount = document.querySelectorAll('.db-member-chk').length;
+      if(dbCount > 0) {
+        document.getElementById('dbCountText').textContent = `총 ${dbCount}명`;
+      }
+    };
+  </script>
+</body>
+</html>

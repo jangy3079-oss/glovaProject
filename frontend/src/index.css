@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #f7fee7;
+  --color-brand-100: #ecfccb;
+  --color-brand-500: #84cc16;
+  --color-brand-600: #65a30d;
+  --color-brand-700: #4d7c0f;
+  
+  --color-toss-blue: #aed630;
+  --color-toss-grey: #4e5968;
+  --color-toss-bg: #f2f4f6;
+  
+  --radius-card: 24px;
+
+  --animate-page-in: pageIn 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+
+  @keyframes pageIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+:root {
+  --bg-color: #F9FBFA;
+  --text-black: #191f28;
+  --text-grey: #4e5968;
+  --text-light: #8b95a1;
+}
+
+body {
+  background-color: #e5e8eb;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: var(--text-black);
+  margin: 0;
+}
+
+/* 토스 스타일의 부드러운 스크롤바 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d6db;
+  border-radius: 10px;
+}
+
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}

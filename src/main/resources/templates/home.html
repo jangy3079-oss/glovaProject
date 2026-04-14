@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="apple-touch-icon" href="/icon.png">
+
+	<link rel="icon" href="/icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glova - 홈</title>
+    <style>
+        :root {
+            --toss-blue: #aed630;       
+            --toss-blue-press: #84cc16; 
+            --text-black: #191f28;      
+            --text-grey: #4e5968;       
+            --text-light: #8b95a1;      
+            --bg-color: #F9FBFA;        
+            --card-bg: #ffffff;         
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #e5e8eb; 
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 90px;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 20px 24px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            margin-bottom: 16px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--toss-blue);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .content {
+            padding: 0 12px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 22px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-black);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .activity-info {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-black);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .btn-attendance {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--toss-blue);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 20px;
+        }
+
+        /* 📅 일정 리스트 스타일 */
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F9FBFA;
+            text-decoration: none; /* 링크 밑줄 제거 */
+            color: inherit;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 날짜 뱃지 스타일 */
+        .date-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background-color: #F9FBFA;
+            border-radius: 12px;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .date-day {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-black);
+        }
+
+        .date-week {
+            font-size: 10px;
+            color: var(--text-light);
+            margin-top: -2px;
+        }
+
+        .event-details {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden; /* 텍스트 넘침 방지 */
+        }
+
+        .event-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-black);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event-time {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .event-status {
+            font-size: 0.75rem;
+            color: var(--toss-blue);
+            font-weight: 600;
+            background: rgba(49, 130, 246, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        
+        .event-status.full {
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 430px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #b0b8c1;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--text-black);
+            font-weight: 700;
+        }
+
+        .nav-icon { font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-top">
+                <h1 class="logo">GLOVA</h1>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="card">
+                <div class="section-title">📍 다음 모임</div>
+
+                <div th:if="${activity != null}">
+                    <div class="activity-info">
+                        <div class="info-row">
+                            <span class="info-label">모임명</span>
+                            <span class="info-value" th:text="${activity.title}">서면 언어교환</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">일시</span>
+                            <span class="info-value" th:text="${#temporals.format(activity.eventDate, 'MM.dd(E) HH:mm')}">01.01(목) 18:20</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">장소</span>
+                            <span class="info-value" th:text="${activity.location}">서면 카페</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">참여 인원</span>
+                            <span class="info-value">
+                                <span style="color:var(--toss-blue)" th:text="${activity.currentParticipants}">0</span>
+                                / <span th:text="${activity.maxParticipants}">20</span>명
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/Globar/attendance" method="post">
+                        <input type="hidden" name="actNum" th:value="${activity.actNum}">
+                        <input type="hidden" name="userId" th:value="${session.loginUser.userId}">
+                        <button type="submit" class="btn-attendance">활동 신청</button>
+                    </form>
+                </div>
+
+                <div th:unless="${activity != null}" style="text-align: center; padding: 30px 0; color: var(--text-light);">
+                    예정된 다음 모임이 없어요
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title" th:text="${#calendars.format(#calendars.createNow(), 'M월')} + ' 일정 미리보기'">📅 일정 미리보기</div>
+                
+                <div class="schedule-list">
+                    <div th:if="${#lists.isEmpty(monthlyActivities)}" style="text-align: center; padding: 20px 0; color: var(--text-light); font-size: 0.9rem;">
+                        이번 달은 예정된 일정이 없어요 😴
+                    </div>
+
+                    <a th:each="act : ${monthlyActivities}" 
+                       th:href="@{/Globar/calendar/{id}(id=${act.actNum})}" 
+                       class="schedule-item">
+                        
+                        <div class="date-badge">
+                            <span class="date-day" th:text="${#temporals.format(act.eventDate, 'dd')}">01</span>
+                            <span class="date-week" th:text="${#temporals.format(act.eventDate, 'E')}">Mon</span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <div class="event-title" th:text="${act.title}">모임 제목</div>
+                            <div class="event-time">
+                                <span th:text="${#temporals.format(act.eventDate, 'HH:mm')}">12:00</span> · 
+                                <span th:text="${act.location}">장소</span>
+                            </div>
+                        </div>
+
+                        <div th:if="${act.currentParticipants < act.maxParticipants}" class="event-status">모집중</div>
+                        <div th:unless="${act.currentParticipants < act.maxParticipants}" class="event-status full">마감</div>
+                    </a>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px; border-top: 1px solid #F9FBFA; padding-top: 15px;">
+                    <a href="/Globar/calendar" style="text-decoration: none; color: var(--text-grey); font-size: 0.9rem; font-weight: 600;">
+                        전체 일정 보기 ›
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="/Globar/home" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span>홈</span>
+            </a>
+            <a href="/Globar/community" class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span>커뮤니티</span>
+            </a>
+            <a href="/Globar/calendar" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span>캘린더</span>
+            </a>
+            <a href="/Globar/mypage" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>마이</span>
+            </a>
+        </nav>
+    </div>
+
+</body>
+</html>

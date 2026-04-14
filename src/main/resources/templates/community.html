@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="apple-touch-icon" href="/icon.png">
+
+	<link rel="icon" href="/icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globar - 커뮤니티</title>
+    <style>
+        /* ... 기존의 root 변수 및 공통 스타일 유지 ... */
+        :root {
+            --toss-blue: #aed630;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --text-light: #8b95a1;
+            --bg-color: #ffffff;
+            --line-color: #F9FBFA;
+            --notice-bg: #fff1f1;
+            --notice-text: #e85e5e;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background-color: #e5e8eb;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 90px;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            padding: 20px 24px 10px;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-black);
+            margin: 0;
+        }
+
+        /* 필터 스타일 */
+        .filter-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: #F9FBFA;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 32px 8px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-grey);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .filter-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 10px;
+            color: var(--text-grey);
+        }
+
+        /* 게시글 리스트 스타일 (개선됨) */
+        .post-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-item {
+            padding: 20px 24px;
+            background-color: white;
+            text-decoration: none;
+            border-bottom: 1px solid var(--line-color);
+            transition: background-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px; /* 요소 간 간격 */
+        }
+
+        .post-item:active {
+            background-color: #F9FBFA;
+        }
+
+        /* 1. 상단 정보: 작성자 프로필 + 날짜 */
+        .post-meta-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .author-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-grey);
+        }
+
+        .post-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* 2. 제목 */
+        .post-title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .post-title {
+            font-size: 17px;
+            font-weight: 700; /* 제목 더 굵게 */
+            color: var(--text-black);
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .notice-badge {
+            background-color: var(--notice-bg);
+            color: var(--notice-text);
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* 3. 본문 미리보기 (한 줄) */
+        .post-preview {
+            font-size: 14px;
+            color: var(--text-grey);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+        }
+
+        /* 4. 하단 정보: 조회수, 댓글 수 */
+        .post-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        /* 플로팅 버튼 */
+        .floating-layer {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            height: 0;
+            z-index: 500;
+            pointer-events: none;
+        }
+
+        .fab {
+            position: absolute;
+            bottom: 90px;
+            right: 20px;
+            background-color: var(--text-black);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+            transition: transform 0.2s;
+        }
+
+        .fab:active { transform: scale(0.95); }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 430px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--line-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #b0b8c1;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--text-black);
+            font-weight: 700;
+        }
+
+        .nav-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-top">
+            <h1 class="page-title">커뮤니티</h1>
+            <form action="/Globar/community" method="get">
+                <div class="filter-wrapper">
+                    <select name="category" id="category" onchange="this.form.submit()">
+                        <option value="SEOMYEON" th:selected="${currentCategory == 'SEOMYEON'}">서면</option>
+                        <option value="BUMIN" th:selected="${currentCategory == 'BUMIN'}">부민</option>
+                    </select>
+                    <span class="filter-arrow">▼</span>
+                </div>
+            </form>
+        </div>
+    </header>
+
+    <div class="post-list">
+        <a th:each="post : ${posts}" th:href="@{/Globar/community/{num}(num=${post.postNum})}" class="post-item">
+            
+            <div class="post-meta-header">
+                <span class="author-name" th:text="${post.authorName}">익명</span>
+                <span style="color:#e5e8eb">·</span> <span class="post-date" th:text="${#temporals.format(post.regDate, 'MM.dd')}">12.31</span>
+            </div>
+
+            <div class="post-title-row">
+                <span th:if="${post.isNotice}" class="notice-badge">공지</span>
+                <div class="post-title" th:text="${post.title}">제목</div>
+            </div>
+
+            <div class="post-preview" th:text="${#strings.abbreviate(post.content, 40)}">
+                본문 내용이 미리보기로 보여집니다...
+            </div>
+
+            <div class="post-stats">
+				<span>👀 <span th:text="${post.viewCount}">0</span></span>
+				<span>💬 <span th:text="${post.replyCount}">0</span></span>
+            </div>
+        </a>
+    </div>
+
+    <div class="floating-layer">
+        <a href="/Globar/community/write" class="fab">
+            <span>✏️</span> 글쓰기
+        </a>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/Globar/home" class="nav-item"><span class="nav-icon">🏠</span><span>홈</span></a>
+        <a href="/Globar/community" class="nav-item active"><span class="nav-icon">💬</span><span>커뮤니티</span></a>
+        <a href="/Globar/calendar" class="nav-item"><span class="nav-icon">📅</span><span>캘린더</span></a>
+        <a href="/Globar/mypage" class="nav-item"><span class="nav-icon">👤</span><span>마이</span></a>
+    </nav>
+</div>
+
+</body>
+</html>

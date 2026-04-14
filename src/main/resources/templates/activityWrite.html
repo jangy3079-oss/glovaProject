@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="apple-touch-icon" href="/icon.png">
+
+	<link rel="icon" href="/icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globar - 활동 등록</title>
+    <style>
+        :root {
+            --primary-color: #3498db; /* MeetUs 블루 */
+            --success-color: #2ecc71; /* 등록 버튼 초록색 */
+            --bg-color: #f5f7fa;
+            --text-dark: #2d3436;
+            --text-gray: #636e72;
+            --border-color: #eee;
+            --border-radius: 15px;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #e9ecef; /* 외부 배경 */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 전체 모바일 프레임 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 430px; /* 모바일 표준 너비 고정 */
+            min-height: 100vh;
+            background-color: white;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px; /* 하단바 공간 확보 */
+        }
+
+        /* 상단 배너 섹션 */
+        .top-banner {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-banner::after {
+            content: "ADMIN MODE";
+            color: white;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: bold;
+        }
+
+        /* 콘텐츠 영역 */
+        .content {
+            padding: 25px 20px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0 0 25px 0;
+            color: var(--text-dark);
+        }
+
+        /* 폼 스타일 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-gray);
+            padding-left: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+            background-color: #fcfcfc;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        textarea {
+            resize: none;
+            min-height: 120px;
+        }
+
+        /* 버튼 영역 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-cancel {
+            background-color: #f1f3f5;
+            color: #666;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 하단 고정 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 430px;
+            height: 75px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #adb5bd;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .nav-icon { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="top-banner">
+        <a href="javascript:history.back()" class="back-btn">←</a>
+    </div>
+
+    <div class="content">
+        <span class="admin-badge">ADMIN</span>
+        <h2>새 활동 일정 등록</h2>
+
+        <form action="/Globar/calendar/write" method="post">
+            
+            <div class="form-group">
+                <label for="title">활동 명칭</label>
+                <input type="text" id="title" name="title" placeholder="예: 서면 언어교환 모임" required>
+            </div>
+
+            <div class="form-group">
+                <label for="eventDate">활동 일시</label>
+                <input type="datetime-local" id="eventDate" name="eventDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">장소</label>
+                <input type="text" id="location" name="location" placeholder="예: 서면 OO카페" required>
+            </div>
+
+            <div class="form-group">
+                <label for="maxParticipants">최대 모집 인원 (명)</label>
+                <input type="number" id="maxParticipants" name="maxParticipants" min="1" value="20" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">활동 상세 설명 (선택)</label>
+                <textarea id="description" name="description" placeholder="참가자들이 확인할 상세 내용을 입력하세요."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-submit">활동 등록하기</button>
+                <button type="button" class="btn btn-cancel" onclick="history.back()">취소</button>
+            </div>
+
+        </form>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/Globar/home" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>홈</span>
+        </a>
+        <a href="/Globar/community" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>커뮤니티</span>
+        </a>
+        <a href="/Globar/calendar" class="nav-item active">
+            <span class="nav-icon">📅</span>
+            <span>캘린더</span>
+        </a>
+        <a href="/Globar/mypage" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>마이</span>
+        </a>
+    </nav>
+</div>
+
+</body>
+</html>

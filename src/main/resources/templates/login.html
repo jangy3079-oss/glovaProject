@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glova - 로그인</title>
+    <style>
+        :root {
+            --toss-blue: #aed630;
+            --toss-blue-press: #84cc16;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --text-light: #8b95a1;
+            --input-bg: #F9FBFA;
+            --bg-color: #F9FBFA;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            background-color: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: auto; 
+            padding: 30px 24px;
+            box-sizing: border-box;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .logo-section {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 25px;
+            margin-top: 5px;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--toss-blue);
+            margin: 0;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
+        .login-form-wrapper {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-grey);
+            margin-bottom: 8px;
+            margin-left: 2px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            height: 54px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 16px;
+            background-color: var(--input-bg);
+            font-size: 1rem;
+            color: var(--text-black);
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        input::placeholder {
+            color: var(--text-light);
+        }
+
+        input:focus {
+            outline: none;
+            background-color: #e8ebed;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 54px;
+            background-color: var(--toss-blue);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--toss-blue-press);
+        }
+
+        .footer-links {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .footer-links a {
+            color: var(--text-grey);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="logo-section">
+            <h1 class="logo">GLOVA</h1>
+            <div class="subtitle">다양한 언어 교환의 시작,<br>글로바에서 만나요</div>
+        </div>
+
+        <div class="login-form-wrapper">
+            <div th:if="${param.error}" class="error-msg">
+                <span style="font-size:1.2rem">⚠️</span> 아이디 또는 비밀번호를 확인해주세요.
+            </div>
+
+            <form id="loginForm" action="/Globar/login" method="post">
+                <div class="form-group">
+                    <label for="username">아이디</label>
+                    <input type="text" id="username" name="username" placeholder="아이디 입력" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="비밀번호 입력" required>
+                </div>
+
+                <input type="hidden" name="fcmToken" id="fcmTokenInput">
+
+                <button type="submit" class="btn-login" id="loginBtn">로그인</button>
+            </form>
+
+            <div class="footer-links">
+                아직 계정이 없으신가요? <a href="/Globar/register">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyB93YYPWNzeGwRS0XH2d1oth127kspQ0E4",
+          authDomain: "glova-2aa96.firebaseapp.com",
+          projectId: "glova-2aa96",
+          storageBucket: "glova-2aa96.firebasestorage.app",
+          messagingSenderId: "83102862549",
+          appId: "1:83102862549:web:83f33a0fd5a26e291aa65c",
+          measurementId: "G-46KX2HEMYX"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // 로딩되자마자 시도
+        async function tryGetToken() {
+            try {
+                if (Notification.permission === 'granted') {
+                    const token = await getToken(messaging, { vapidKey: 'BP6Q3kXbv9jrCps595aBwpYc-6pvam5oLtw1AnlW1qR_xix0TFcmep-SJwAmy9vDOdBxDhSc1AnkvzrKqzkaovA' });
+                    if (token) {
+                        console.log("FCM 토큰 확보:", token);
+                        document.getElementById('fcmTokenInput').value = token;
+                    }
+                }
+            } catch (err) {
+                console.log("토큰 로드 중 에러:", err);
+            }
+        }
+        
+        tryGetToken();
+
+        // 🔥 [핵심] 로그인 버튼 누를 때 한번 더 확실하게 체크!
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            // 토큰이 비어있으면 잠깐 멈추고 토큰 가져오기 시도
+            const tokenInput = document.getElementById('fcmTokenInput');
+            if (!tokenInput.value) {
+                e.preventDefault(); // 잠시 제출 멈춤
+                try {
+                    console.log("로그인 전 토큰 요청 시도...");
+                    const token = await getToken(messaging, { vapidKey: 'BP6Q3kXbv9jrCps595aBwpYc-6pvam5oLtw1AnlW1qR_xix0TFcmep-SJwAmy9vDOdBxDhSc1AnkvzrKqzkaovA' });
+                    if (token) {
+                        tokenInput.value = token;
+                    }
+                } catch (error) {
+                    console.error("토큰 없이 로그인 진행:", error);
+                }
+                // 토큰을 넣었든 못 넣었든 이제 제출!
+                this.submit();
+            }
+        });
+    </script>
+
+</body>
+</html>

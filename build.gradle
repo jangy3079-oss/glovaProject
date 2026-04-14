@@ -1,0 +1,54 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.springboot'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc' // 또는 JPA
+    implementation 'com.google.firebase:firebase-admin:9.2.0' // 버전은 최신 확인 필요
+    runtimeOnly 'com.mysql:mysql-connector-j' // MySQL 드라이버
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // View (Thymeleaf 사용 시)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// 🔥 실행 불가능한 plain jar 생성 방지
+jar {
+    enabled = false
+}
+
+// 🚀 정적 리소스 변화를 감지하여 JAR 빌드 강제 최신화
+tasks.named('bootJar') {
+    inputs.dir('src/main/resources/static')
+    outputs.upToDateWhen { false } // 무조건 새로 빌드하게 강제
+}

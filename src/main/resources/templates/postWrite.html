@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="apple-touch-icon" href="/icon.png">
+
+	<link rel="icon" href="/icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globar - 글쓰기</title>
+    <style>
+        :root {
+            --toss-blue: #aed630;
+            --toss-blue-press: #84cc16;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --text-light: #8b95a1;
+            --input-bg: #F9FBFA;
+            --bg-color: #ffffff;
+            --line-color: #F9FBFA;
+            --danger-color: #ff4757;
+            --notice-bg: #fff1f1;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #e5e8eb;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 앱 프레임 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 90px;
+        }
+
+        /* 헤더: 뒤로가기 + 타이틀 */
+        header {
+            padding: 15px 20px;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--line-color);
+        }
+
+        .back-btn {
+            font-size: 20px;
+            color: var(--text-black);
+            text-decoration: none;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-black);
+        }
+
+        /* 콘텐츠 래퍼 */
+        .content {
+            padding: 24px;
+            flex: 1;
+        }
+
+        /* 폼 스타일 */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-grey);
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        /* 토스 스타일 입력창: 테두리 없음, 회색 배경 */
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            background-color: var(--input-bg);
+            font-size: 16px;
+            color: var(--text-black);
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: background-color 0.2s;
+            appearance: none; /* 브라우저 기본 스타일 제거 */
+            -webkit-appearance: none;
+        }
+
+        /* placeholder 색상 */
+        input::placeholder, textarea::placeholder {
+            color: var(--text-light);
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            background-color: #e8ebed; /* 포커스 시 배경 진하게 */
+        }
+
+        textarea {
+            resize: none;
+            min-height: 250px;
+            line-height: 1.6;
+        }
+
+        /* 공지사항 체크박스 (관리자용) - 토글 느낌 */
+        .admin-notice-box {
+            background-color: var(--notice-bg);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-notice-box label {
+            margin-bottom: 0;
+            color: var(--danger-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .admin-notice-box input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--danger-color);
+            cursor: pointer;
+        }
+
+        /* 하단 버튼 그룹 */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--toss-blue);
+            color: white;
+        }
+
+        .btn-submit:active {
+            background-color: var(--toss-blue-press);
+        }
+
+        .btn-cancel {
+            background-color: var(--input-bg);
+            color: var(--text-grey);
+        }
+
+        .btn-cancel:active {
+            background-color: #e1e4e8;
+        }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 430px;
+            height: 70px;
+            background: white;
+            border-top: 1px solid var(--line-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #b0b8c1;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active { color: var(--text-black); font-weight: 700; }
+        .nav-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <a href="javascript:history.back()" class="back-btn">❮</a>
+        <span class="header-title">글쓰기</span>
+    </header>
+
+    <div class="content">
+        <form action="/Globar/community/write" method="post" th:object="${post}">
+            
+            <div class="form-group">
+                <label for="category">게시판 선택</label>
+                <div style="position: relative;">
+                    <select name="category" id="category">
+                        <option value="SEOMYEON">서면 게시판</option>
+                        <option value="BUMIN">부민 게시판</option>
+                    </select>
+                    <span style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8b95a1; font-size: 12px;">▼</span>
+                </div>
+            </div>
+
+            <div th:if="${session.loginUser.role == 'ADMIN'}" class="admin-notice-box">
+                <label>
+                    <input type="checkbox" name="notice" value="true">
+                    📢 이 글을 공지사항으로 등록
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="content">내용</label>
+                <textarea id="content" name="content" placeholder="내용을 자유롭게 입력해주세요." required></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-cancel" onclick="history.back()">취소</button>
+                <button type="submit" class="btn btn-submit">등록하기</button>
+            </div>
+        </form>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/Globar/home" class="nav-item">
+            <span class="nav-icon">🏠</span><span>홈</span>
+        </a>
+        <a href="/Globar/community" class="nav-item active">
+            <span class="nav-icon">💬</span><span>커뮤니티</span>
+        </a>
+        <a href="/Globar/calendar" class="nav-item">
+            <span class="nav-icon">📅</span><span>캘린더</span>
+        </a>
+        <a href="/Globar/mypage" class="nav-item">
+            <span class="nav-icon">👤</span><span>마이</span>
+        </a>
+    </nav>
+</div>
+
+</body>
+</html>

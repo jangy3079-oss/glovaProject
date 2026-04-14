@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GLOVA 앱 사용 안내</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        :root {
+            --toss-blue: #aed630;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --text-light: #8b95a1;
+            --bg-grey: #F9FBFA;
+            --card-white: #ffffff;
+            --box-bg: #f9fbfd;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-grey);
+            margin: 0;
+            color: var(--text-black);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 30px 24px 40px;
+        }
+
+        /* 헤더 영역 */
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 17px;
+            color: var(--text-grey);
+            margin: 0;
+        }
+
+        /* 카드 공통 스타일 */
+        .card {
+            background-color: var(--card-white);
+            border-radius: 24px;
+            padding: 28px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-text {
+            font-size: 16px;
+            color: var(--text-grey);
+            margin-bottom: 12px;
+            word-break: keep-all;
+        }
+
+        /* 안전성 강조 텍스트 */
+        .safe-badge {
+            display: inline-flex;
+            align-items: center;
+            color: var(--toss-blue);
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 16px;
+        }
+
+        /* 권한 설명 박스 스타일 추가 */
+        .permission-box {
+            background-color: var(--box-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e1e7ed;
+        }
+
+        .permission-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-black);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .permission-list {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 15px;
+            color: var(--text-grey);
+        }
+
+        .permission-list li {
+            margin-bottom: 6px;
+        }
+
+        /* 설치 가이드 스텝 스타일 */
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            background-color: var(--toss-blue);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            margin-right: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .step-num.android {
+            background-color: #2ecc71; 
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-black);
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            color: var(--text-grey);
+            word-break: keep-all;
+        }
+
+        .icon-box {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--bg-grey);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-black);
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #b0b8c1;
+            padding-top: 20px;
+            border-top: 1px solid #e5e8eb;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>GLOVA를<br>앱처럼 사용해보세요</h1>
+        <p class="subtitle">설치 없이 바로 시작하는 새로운 웹앱</p>
+    </header>
+
+    <div class="card">
+        <h2>안전한가요? 🤔</h2>
+        <div class="safe-badge">
+            <span>✅ 네, 개인정보 걱정 없이 사용하세요.</span>
+        </div>
+        <p class="card-text">
+            GLOVA는 앱스토어 설치 없이 브라우저에서 바로 실행되는 <strong>'웹앱(Web App)'</strong>입니다. 
+        </p>
+        <p class="card-text">
+            여러분의 연락처, 사진, 카메라, 위치 정보 등 민감한 개인정보에는 <strong>기술적으로 접근할 수 없으니</strong> 안심하셔도 됩니다.
+        </p>
+
+        <div class="permission-box">
+            <div class="permission-title">🔔 딱 하나, '알림' 권한만!</div>
+            <p class="card-text" style="font-size: 15px; margin-bottom: 10px;">
+                오직 여러분께 소식을 전하기 위해서만 권한을 요청합니다.
+            </p>
+            <ul class="permission-list">
+                <li>친구가 내 글에 댓글을 남겼을 때</li>
+                <li>새로운 답장이 도착했을 때</li>
+				<li>새로운 활동 일정이 등록됐을 때!</li>
+            </ul>
+            <p class="card-text" style="font-size: 14px; margin-top: 12px; margin-bottom: 0; color: var(--toss-blue); font-weight: 600;">
+                빠른 소통을 위해 [허용]을 눌러주세요!
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🍎 아이폰 (Safari)</h2>
+        <p class="card-text" style="margin-bottom: 30px;">
+            사파리 브라우저에서 <span class="icon-box">glova.cloud</span>에 접속 한 후 아래 순서대로 진행해 주세요.
+        </p>
+
+        <div class="step-list">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <div class="step-title">공유 버튼 누르기</div>
+                    <div class="step-desc">
+                        화면 하단 중앙의 <span class="icon-box">공유 버튼(↑)</span>을 눌러주세요.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <div class="step-title">'홈 화면에 추가' 선택</div>
+                    <div class="step-desc">
+                        메뉴를 아래로 내려서 <span class="icon-box">홈 화면에 추가 +</span> 버튼을 찾아 눌러주세요.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <div class="step-title">추가 완료!</div>
+                    <div class="step-desc">
+                        오른쪽 상단의 <strong>[추가]</strong>를 누르면 바탕화면에 앱 아이콘이 생깁니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🤖 안드로이드 (Chrome)</h2>
+        <p class="card-text" style="margin-bottom: 30px;">
+            크롬(Chrome) 브라우저에서 <span class="icon-box">glova.cloud</span>에 접속 한 후 아래 순서대로 진행해 주세요.
+        </p>
+
+        <div class="step-list">
+            <div class="step">
+                <div class="step-num android">1</div>
+                <div class="step-content">
+                    <div class="step-title">메뉴 버튼 누르기</div>
+                    <div class="step-desc">
+                        오른쪽 상단의 <span class="icon-box">점 세 개 (⋮)</span> 버튼을 눌러주세요.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num android">2</div>
+                <div class="step-content">
+                    <div class="step-title">'앱 설치' 선택</div>
+                    <div class="step-desc">
+                        메뉴에서 <span class="icon-box">앱 설치</span> 또는 <span class="icon-box">홈 화면에 추가</span>를 선택하세요.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num android">3</div>
+                <div class="step-content">
+                    <div class="step-title">설치 완료!</div>
+                    <div class="step-desc">
+                        팝업창에서 <strong>[설치]</strong>를 누르면 잠시 후 바탕화면에 앱이 설치됩니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated for GLOVA Team
+    </div>
+</div>
+
+</body>
+</html>

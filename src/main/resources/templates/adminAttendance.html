@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 출석 명단</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        :root {
+            --toss-blue: #aed630;
+            --toss-blue-press: #84cc16;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --bg-color: #F9FBFA;
+        }
+        body { font-family: 'Pretendard', sans-serif; padding: 20px; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; min-height: 100vh;}
+        .container { width: 100%; max-width: 500px; margin-top: 20px; background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: fit-content;}
+        
+        .header { border-bottom: 2px solid #F9FBFA; margin-bottom: 20px; padding-bottom: 20px; text-align: center;}
+        .header h3 { font-size: 22px; font-weight: 800; color: var(--text-black); margin: 0 0 10px 0;}
+        .act-title { font-size: 15px; color: var(--text-grey); margin: 0 0 8px 0; font-weight: 600;}
+        .total-count { font-size: 14px; color: var(--toss-blue); font-weight: 700; background: #e8f3ff; padding: 4px 12px; border-radius: 999px; display: inline-block;}
+        
+        .list-item { padding: 16px; border-radius: 16px; background: #F9FBFA; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #F9FBFA;}
+        
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-icon { background: #e8ebed; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+        .user-name { font-weight: 700; color: var(--text-black); font-size: 16px;}
+        
+        .time-info { color: #8b95a1; font-size: 13px; font-weight: 500;}
+        
+        /* 🔥 새로 추가된 조 짜기 버튼 스타일 */
+        .btn-primary { 
+            display: block; 
+            width: 100%; 
+            padding: 18px; 
+            background-color: var(--toss-blue); 
+            color: white; 
+            text-align: center; 
+            border-radius: 16px; 
+            text-decoration: none; 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin-top: 30px; 
+            transition: 0.2s; 
+            box-sizing: border-box;
+        }
+        .btn-primary:active { background-color: var(--toss-blue-press); }
+
+        .back-link { display: block; margin-top: 15px; padding: 16px; text-align: center; color: var(--text-grey); background: var(--bg-color); border-radius: 16px; text-decoration: none; font-weight: 700; transition: 0.2s;}
+        .back-link:active { background: #e8ebed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h3>📋 출석 명단 확인</h3>
+            <p class="act-title" th:text="${activity.title}">활동 제목</p>
+            <div class="total-count">총 출석: <span th:text="${#lists.size(attendList)}">0</span>명</div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(attendList)}" style="text-align:center; padding:40px 20px; color:#8b95a1; font-size:15px; background:#F9FBFA; border-radius:16px;">
+            아직 출석한 인원이 없습니다.
+        </div>
+
+        <div th:each="att : ${attendList}" class="list-item">
+            <div class="user-info">
+                <div class="user-icon">👤</div>
+                <span class="user-name" th:text="${att.nickname}">홍길동</span>
+            </div>
+            <div class="time-info">
+                <span th:text="${#temporals.format(att.attDate, 'MM.dd HH:mm')}">시간</span>
+            </div>
+        </div>
+
+        <a th:href="@{|/Globar/admin/seat/${activity.actNum}|}" class="btn-primary">🎲 현장 출석 & 조 짜기</a>
+
+        <a href="javascript:history.back()" class="back-link">이전으로 돌아가기</a>
+    </div>
+</body>
+</html>

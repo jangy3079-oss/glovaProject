@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="apple-touch-icon" href="/icon.png">
+
+	<link rel="icon" href="/icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globar - 마이페이지</title>
+    <style>
+        :root {
+            --toss-blue: #aed630;
+            --text-black: #191f28;
+            --text-grey: #4e5968;
+            --text-light: #8b95a1;
+            --bg-color: #F9FBFA;
+            --card-bg: #ffffff;
+            --line-color: #F9FBFA;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #e5e8eb;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 앱 프레임 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 90px;
+        }
+
+        /* 프로필 섹션 (흰색 카드) */
+        .profile-section {
+            background-color: var(--card-bg);
+            padding: 30px 24px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-circle {
+            width: 64px;
+            height: 64px;
+            background-color: #F9FBFA;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: var(--text-grey);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nickname {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-black);
+        }
+
+        .user-role {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* 메뉴 리스트 섹션 (흰색 카드) */
+        .menu-section {
+            background-color: var(--card-bg);
+            margin-bottom: 12px;
+        }
+
+        .menu-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-black);
+            padding: 24px 24px 10px;
+        }
+
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            text-decoration: none;
+            background-color: white;
+            transition: background 0.2s;
+        }
+
+        .menu-item:active {
+            background-color: #F9FBFA;
+        }
+
+        .menu-label {
+            font-size: 16px;
+            color: var(--text-black);
+            font-weight: 500;
+        }
+
+        .menu-value {
+            font-size: 15px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arrow-icon {
+            font-size: 12px;
+            color: #d1d6db;
+        }
+
+        /* 자기소개 영역 */
+        .bio-text {
+            font-size: 15px;
+            color: var(--text-grey);
+            line-height: 1.5;
+            padding: 0 24px 24px;
+        }
+
+        /* 하단 로그아웃 버튼 (텍스트 형태) */
+        .logout-section {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .btn-text-logout {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 430px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #b0b8c1;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--text-black);
+            font-weight: 700;
+        }
+
+        .nav-icon { font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div th:if="${session.loginUser != null}">
+        <div class="profile-section">
+            <div class="avatar-circle">👤</div>
+            <div class="profile-info">
+                <div class="nickname" th:text="${session.loginUser.nickname}">닉네임</div>
+                <a href="/Globar/mypage/edit" style="font-size: 13px; color: var(--toss-blue); text-decoration: none; font-weight: 600; margin-top: 4px;">
+                    내 정보 수정 ›
+                </a>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">계정 정보</div>
+            
+            <div class="menu-list">
+                <div class="menu-item">
+                    <span class="menu-label">아이디</span>
+                    <span class="menu-value" th:text="${session.loginUser.username}">user01</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-label">활동 지역</span>
+                    <div class="menu-value">
+                        <span th:text="${session.loginUser.language}">Seoul</span>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-label">회원 권한</span>
+                    <span class="menu-value" th:text="${session.loginUser.role == 'ADMIN' ? '운영자' : '일반회원'}">일반회원</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title">자기소개</div>
+            <div class="bio-text" th:text="${session.loginUser.bio != null ? session.loginUser.bio : '아직 소개가 없습니다.'}">
+                자기소개 내용이 들어갑니다.
+            </div>
+        </div>
+
+        <div class="logout-section">
+            <button type="button" class="btn-text-logout" onclick="location.href='/Globar/logout'">로그아웃</button>
+        </div>
+    </div>
+
+    <div th:unless="${session.loginUser != null}" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 80vh; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 20px; color: #d1d6db;">🔒</div>
+        <p style="color: var(--text-grey); margin-bottom: 30px; font-weight: 500;">
+            로그인이 필요한 서비스입니다.
+        </p>
+        <a href="/Globar/login" style="background-color: var(--toss-blue); color: white; padding: 15px 40px; border-radius: 16px; text-decoration: none; font-weight: 700;">
+            로그인하기
+        </a>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/Globar/home" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>홈</span>
+        </a>
+        <a href="/Globar/community" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>커뮤니티</span>
+        </a>
+        <a href="/Globar/calendar" class="nav-item">
+            <span class="nav-icon">📅</span>
+            <span>캘린더</span>
+        </a>
+        <a href="/Globar/mypage" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span>마이</span>
+        </a>
+    </nav>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "short_name": "GLOVA",
+  "name": "GLOVA - Global Language Exchange",
+  "icons": [
+    {
+      "src": "/glovaLogo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#47a432",
+  "background_color": "#ffffff"
+}
