@@ -22,7 +22,7 @@ api.interceptors.response.use(
       console.warn('⚠️ 세션 만료 또는 권한 없음. 로그인 페이지로 이동합니다.');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/Globar/login';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

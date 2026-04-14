@@ -1,32 +1,51 @@
 package com.springboot.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 1. 비밀번호 암호화 빈 등록
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // 2. HTTP 보안 설정 (기존 로직 유지 위해 전체 허용)
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())       // CSRF 보호 잠시 비활성화 (REST API 환경)
+            .csrf(csrf -> csrf.disable()) // Stateless API이므로 CSRF 비활성화
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()      // 모든 요청 허용 (기존 인터셉터에서 권한 제어 중이므로)
+                // 1. 공용 API (비로그인 허용)
+                .requestMatchers("/api/Globar/login", "/api/Globar/register").permitAll()
+                .requestMatchers("/api/Globar/home", "/api/Globar/community/**").permitAll()
+                .requestMatchers("/api/Globar/calendar", "/api/Globar/activity/**").permitAll()
+                
+                // 2. 관리자 전용 API
+                .requestMatchers("/api/Globar/calendar/write").hasRole("ADMIN")
+                .requestMatchers("/api/Globar/admin/**").hasRole("ADMIN")
+                
+                // 3. 정적 리소스 (빌드된 리액트 파일 등)
+                .requestMatchers("/", "/index.html", "/assets/**", "/*.png", "/*.svg", "/manifest.json").permitAll()
+                
+                // 4. 나머지 모든 API는 인증 필요
+                .anyRequest().authenticated()
             )
-            .formLogin(form -> form.disable()) // 기본 로그인 페이지 비활성화
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());
             
         return http.build();

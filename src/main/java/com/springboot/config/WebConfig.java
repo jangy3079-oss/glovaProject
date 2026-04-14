@@ -8,20 +8,13 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.springboot.interceptor.AuthInterceptor;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private AuthInterceptor authInterceptor;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/api/Globar/**") // Globar 내의 모든 경로 검사
-                .excludePathPatterns("/api/Globar/login", "/api/Globar/register", "/api/Globar/community", "/api/Globar/community/**"); // 로그인 등 인증 필요없는 곳은 예외. 단, 댓글 작성등은 안에서 잡아주거나 세분화.
-                // 커뮤니티 조회는 비회원도 볼 수 있게 열어둡니다. (만약 다 막으시려면 커뮤니티도 빼주세요)
+        // 기존 인터셉터 로직을 Spring Security 필터로 이관함
     }
 
     // React 연동을 위한 CORS 글로벌 설정

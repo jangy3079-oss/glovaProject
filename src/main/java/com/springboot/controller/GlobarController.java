@@ -38,52 +38,39 @@ public class GlobarController {
         String password = payload.get("password");
         String fcmToken = payload.get("fcmToken");
 
-        try {
-            User loginUser = globarService.login(username, password);
-            if (loginUser != null) {
-                // JWT 발급
-                String token = jwtUtil.generateToken(loginUser.getUsername(), loginUser.getRole());
-                
-                // 쿠키에도 셋팅 (옵션)
-                Cookie cookie = new Cookie("jwt_token", token);
-                cookie.setPath("/");
-                cookie.setMaxAge(7 * 24 * 60 * 60); // 7일
-                cookie.setHttpOnly(true); // 브라우저 JS 접근 제한 (보안 향상)
-                response.addCookie(cookie);
+        User loginUser = globarService.login(username, password);
+        if (loginUser != null) {
+            // JWT 발급
+            String token = jwtUtil.generateToken(loginUser.getUsername(), loginUser.getRole());
+            
+            // 쿠키에도 셋팅 (HTTPOnly로 보안 강화)
+            Cookie cookie = new Cookie("jwt_token", token);
+            cookie.setPath("/");
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
 
-                if (fcmToken != null && !fcmToken.isEmpty()) {
-                    System.out.println("🔄 [로그인 알림 업데이트] 사용자: " + loginUser.getUsername() + ", 토큰 있음");
-                    globarService.updateFcmToken(loginUser.getUserId(), fcmToken);
-                } else {
-                    System.out.println("ℹ️ [로그인 알림 건너뜀] 사용자: " + loginUser.getUsername() + ", 전달된 토큰 없음");
-                }
-
-                Map<String, Object> result = new HashMap<>();
-                result.put("message", "Login successful");
-                result.put("token", token); // 헤더 토큰용으로도 같이 반환
-                // 비밀번호 제거 후 반환
-                loginUser.setPassword(null);
-                result.put("user", loginUser);
-                
-                return ResponseEntity.ok(result);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "아이디 또는 비밀번호가 일치하지 않습니다."));
+            if (fcmToken != null && !fcmToken.isEmpty()) {
+                globarService.updateFcmToken(loginUser.getUserId(), fcmToken);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "로그인 처리 중 서버 에러 발생"));
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("message", "Login successful");
+            result.put("token", token);
+            loginUser.setPassword(null);
+            result.put("user", loginUser);
+            
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "아이디 또는 비밀번호가 일치하지 않습니다."));
         }
     }
 
     // 2. 회원가입 API
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        try {
-            globarService.register(user);
-            return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "회원가입 실패"));
-        }
+        globarService.register(user);
+        return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
     }
 
     // 3. 홈 화면 API
@@ -130,16 +117,8 @@ public class GlobarController {
 
     @GetMapping("/activity/{actNum}/attendees")
     public ResponseEntity<?> activityAttendees(@PathVariable("actNum") Long actNum) {
-        System.out.println("🔍 [명단 조회 요청] 활동 번호: " + actNum);
-        try {
-            List<AttendeeDto> attendees = globarService.getAttendeesForSeat(actNum);
-            System.out.println("✅ [명단 조회 성공] 인원수: " + (attendees != null ? attendees.size() : 0));
-            return ResponseEntity.ok(attendees);
-        } catch (Exception e) {
-            System.err.println("❌ [명단 조회 실패]: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "명단 조회 중 오류 발생"));
-        }
+        List<AttendeeDto> attendees = globarService.getAttendeesForSeat(actNum);
+        return ResponseEntity.ok(attendees);
     }
 
     // 7. 활동 등록 API
@@ -163,16 +142,8 @@ public class GlobarController {
         
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        System.out.println("👉 [활동 신청 시도] 활동번호: " + actNum + ", 사용자ID: " + user.getUserId());
-
-        try {
-            globarService.checkAttendance(actNum, user.getUserId());
-            return ResponseEntity.ok(Map.of("message", "참여 신청 완료"));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "신청 중 오류 발생"));
-        }
+        globarService.checkAttendance(actNum, user.getUserId());
+        return ResponseEntity.ok(Map.of("message", "참여 신청 완료"));
     }
 
     // 10. 마이페이지 (사용자 정보 조회)
@@ -260,12 +231,8 @@ public class GlobarController {
         User user = (User) request.getAttribute("loginUser");
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        try {
-            globarService.checkAttendance(actNum, user.getUserId());
-            return ResponseEntity.ok(Map.of("message", "출석 완료"));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
-        }
+        globarService.checkAttendance(actNum, user.getUserId());
+        return ResponseEntity.ok(Map.of("message", "출석 완료"));
     }
 
     // 15. [관리자 전용] 출석 명단 확인 API

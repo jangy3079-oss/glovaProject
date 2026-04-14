@@ -43,6 +43,7 @@ public class GlobarServiceImpl implements GlobarService {
     }
 
     @Override
+    @Transactional
     public void addPost(Post post, User user) {
         if (user == null) {
             throw new RuntimeException("로그인이 필요한 서비스입니다.");
@@ -56,6 +57,7 @@ public class GlobarServiceImpl implements GlobarService {
     }
 
     @Override
+    @Transactional
     public boolean applyActivity(Long actNum, Long userId) {
         Activity activity = globarRepository.findActivityByNum(actNum);
         
@@ -67,6 +69,7 @@ public class GlobarServiceImpl implements GlobarService {
     }
 
     @Override
+    @Transactional
     public void addActivity(Activity activity) {
         // 1. DB에 활동 저장
         globarRepository.insertActivity(activity);
@@ -144,6 +147,7 @@ public class GlobarServiceImpl implements GlobarService {
     }
 
     @Override
+    @Transactional
     public void addReply(Reply reply) {
         globarRepository.saveReply(reply);
         try {
@@ -169,6 +173,7 @@ public class GlobarServiceImpl implements GlobarService {
     }
     
     @Override
+    @Transactional
     public void checkAttendance(Long actNum, Long userId) {
         if (globarRepository.isAttended(actNum, userId)) {
             throw new IllegalStateException("이미 출석체크를 완료했습니다.");
