@@ -13,12 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
+// 수정: @Slf4j 추가 - System.out.println/System.err.println 대신 SLF4J 로거 사용
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GlobarServiceImpl implements GlobarService {
@@ -76,7 +79,7 @@ public class GlobarServiceImpl implements GlobarService {
         System.out.println("📌 [활동 신규 등록] ID: " + activity.getActNum() + ", 제목: " + activity.getTitle());
 
         // 2. 전체 알림 발송 (전용 메서드 호출)
-        String title = "📢 새로운 모임 알림";
+        String title = "새로운 모임 알림";
         String body = "새로운 활동 [" + activity.getTitle() + "]이(가) 등록되었습니다! 확인해보세요.";
         sendNotificationToAll(title, body);
     }
@@ -85,7 +88,8 @@ public class GlobarServiceImpl implements GlobarService {
         try {
             List<String> allTokens = globarRepository.findAllFcmTokens();
             if (allTokens == null || allTokens.isEmpty()) {
-                System.out.println("ℹ️ [알림 스킵] 발송 대상이 없습니다.");
+                // 수정: System.out.println → log.info() 전환
+                log.info("[알림 스킵] 발송 대상 FCM 토큰이 없습니다.");
                 return;
             }
 
@@ -105,11 +109,14 @@ public class GlobarServiceImpl implements GlobarService {
                     }
                 } catch (Exception e) {
                     failCount++;
+                    log.warn("[알림 발송 실패] 토큰 처리 중 오류: {}", e.getMessage());
                 }
             }
-            System.out.println("🔔 [알림 발송 완료] 성공: " + successCount + ", 실패/정리: " + failCount);
+            // 수정: System.out.println → log.info() 전환
+            log.info("[알림 발송 완료] 성공: {}, 실패/정리: {}", successCount, failCount);
         } catch (Exception e) {
-            System.err.println("⚠️ [알림 프로세스 오류]: " + e.getMessage());
+            // 수정: System.err.println → log.error() 전환
+            log.error("[알림 프로세스 오류]: {}", e.getMessage(), e);
         }
     }
     
@@ -122,7 +129,8 @@ public class GlobarServiceImpl implements GlobarService {
         user.setPassword(encodedPassword);
         
         int result = globarRepository.saveUser(user);
-        System.out.println("💾 [회원가입 완료] DB 저장 결과: " + result); 
+        // 수정: System.out.println → log.info() 전환
+        log.info("[회원가입 완료] DB 저장 결과: {}", result);
     }
 
     @Override public Post getPostDetail(Long postNum) { return globarRepository.findPostByNum(postNum); }
@@ -168,7 +176,8 @@ public class GlobarServiceImpl implements GlobarService {
                 }
             }
         } catch (Exception e) {
-            System.err.println("⚠️ [댓글 알림 오류]: " + e.getMessage());
+            // 수정: System.err.println → log.warn() 전환 (댓글 알림 실패는 비즈니스 로직에 영향 없음)
+            log.warn("[댓글 알림 오류] 알림 발송 실패, 댓글은 정상 저장됨: {}", e.getMessage());
         }
     }
     
@@ -182,10 +191,8 @@ public class GlobarServiceImpl implements GlobarService {
         globarRepository.incrementParticipantCount(actNum);
     }
     
-    @Override
-    public void checkAttendance(Long userId) {
-         System.out.println("User " + userId + " checked attendance.");
-    }
+    // 수정: checkAttendance(Long userId) 데드코드 제거 - stub 메서드로 실제 로직 없음
+    // GlobarService 인터페이스에서도 해당 메서드 시그니처 제거 필요
 
     @Override
     public List<Attendance> getAttendanceList(Long actNum) {
@@ -204,6 +211,8 @@ public class GlobarServiceImpl implements GlobarService {
     }
 
     @Override
+    // 수정: @Transactional 추가 - DB 쓰기 작업(조회수 증가)에 트랜잭션 보장
+    @Transactional
     public void incrementViewCount(Long postNum) {
         globarRepository.incrementViewCount(postNum);
     }

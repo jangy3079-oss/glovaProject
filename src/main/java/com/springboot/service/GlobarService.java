@@ -27,10 +27,10 @@ public interface GlobarService {
     List<Reply> getReplies(Long postNum);
     void addReply(Reply reply);
     void checkAttendance(Long actNum, Long userId);
-    void checkAttendance(Long userId);
+    // 수정: checkAttendance(Long userId) 데드코드 제거 - 실제 구현 없는 stub이었음
     List<Attendance> getAttendanceList(Long actNum);
-    
-    // 🔥 [추가/수정됨] 토큰 갱신, 자리배정, 조회수 증가
+
+    // 토큰 갱신, 자리배정, 조회수 증가
     void updateFcmToken(Long userId, String token);
     List<AttendeeDto> getAttendeesForSeat(Long actNum);
     void incrementViewCount(Long postNum);

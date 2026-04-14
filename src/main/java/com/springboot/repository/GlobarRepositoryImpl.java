@@ -13,10 +13,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
+// 수정: @Slf4j 추가 - System.out.println/System.err.println 대신 SLF4J 로거 사용
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class GlobarRepositoryImpl implements GlobarRepository {
@@ -52,7 +55,8 @@ public class GlobarRepositoryImpl implements GlobarRepository {
         } catch (EmptyResultDataAccessException e) {
             return null; 
         } catch (Exception e) {
-            System.err.println("❌ [에러] 유저 조회 중 에러 발생: " + e.getMessage());
+            // 수정: System.err.println → log.error() 전환
+            log.error("[유저 조회 오류] username={}: {}", username, e.getMessage());
             return null;
         }
     }
@@ -66,7 +70,8 @@ public class GlobarRepositoryImpl implements GlobarRepository {
         } catch (EmptyResultDataAccessException e) {
             return null; // 해당 닉네임 사용자가 없음
         } catch (Exception e) {
-            System.err.println("❌ [에러] 닉네임 조회 중 에러 발생: " + e.getMessage());
+            // 수정: System.err.println → log.error() 전환
+            log.error("[닉네임 조회 오류] nickname={}: {}", nickname, e.getMessage());
             return null;
         }
     }
@@ -313,7 +318,8 @@ public class GlobarRepositoryImpl implements GlobarRepository {
         // users 테이블의 fcm_token 컬럼을 업데이트합니다.
         String sql = "UPDATE users SET fcm_token = ? WHERE user_id = ?";
         int updated = jdbcTemplate.update(sql, token, userId);
-        System.out.println("💾 [DB 업데이트] 사용자 ID: " + userId + ", 결과: " + (updated > 0 ? "성공" : "실패(사용자 없음)"));
+        // 수정: System.out.println → log.info() 전환
+        log.info("[FCM 토큰 업데이트] 사용자 ID: {}, 결과: {}", userId, updated > 0 ? "성공" : "실패(사용자 없음)");
     }
     
  // [추가] 특정 유저의 FCM 토큰만 쏙 꺼내오는 기능
@@ -338,7 +344,8 @@ public class GlobarRepositoryImpl implements GlobarRepository {
     public void deleteFcmToken(String token) {
         String sql = "UPDATE users SET fcm_token = NULL WHERE fcm_token = ?";
         int updated = jdbcTemplate.update(sql, token);
-        System.out.println("🧹 [DB 삭제] 유효하지 않은 토큰(UNREGISTERED) 처리 완료: " + updated + "건");
+        // 수정: System.out.println → log.info() 전환
+        log.info("[FCM 토큰 삭제] 유효하지 않은 토큰(UNREGISTERED) 정리 완료: {}건", updated);
     }
     
  // 자리 배정을 위해 해당 활동(actNum)에 참여한 유저의 닉네임과 레벨을 조인해서 가져옵니다.

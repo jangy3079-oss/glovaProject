@@ -21,13 +21,17 @@ import com.springboot.domain.User;
 import com.springboot.service.GlobarService;
 import com.springboot.util.JwtUtil;
 
+// 수정: @Slf4j 추가 - System.out.println 대신 SLF4J 로거 사용으로 운영 환경 로그 레벨 제어 가능
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/Globar") // API 전용 경로로 변경 (프론트엔드 라우팅과 충돌 우려)
 public class GlobarController {
 
     @Autowired
     private GlobarService globarService;
-    
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -48,6 +52,8 @@ public class GlobarController {
             cookie.setPath("/");
             cookie.setMaxAge(7 * 24 * 60 * 60); // 7일
             cookie.setHttpOnly(true);
+            // 수정: Secure 플래그 추가 - HTTPS 환경에서만 쿠키 전송되도록 강제 (MitM 공격 방지)
+            cookie.setSecure(true);
             response.addCookie(cookie);
 
             if (fcmToken != null && !fcmToken.isEmpty()) {
@@ -125,12 +131,16 @@ public class GlobarController {
     @PostMapping("/calendar/write")
     public ResponseEntity<?> addActivity(@RequestBody Activity activity, HttpServletRequest request) {
         User user = (User) request.getAttribute("loginUser");
-        System.out.println("📝 [활동 등록 시도] 사용자: " + (user != null ? user.getUserId() : "null") + ", 권한: " + (user != null ? user.getRole() : "none"));
-        
+        // 수정: System.out.println → log.debug() 전환
+        log.debug("[활동 등록 시도] 사용자: {}, 권한: {}", user != null ? user.getUserId() : "null", user != null ? user.getRole() : "none");
+
         if (user != null && ("ADMIN".equals(user.getRole()) || "ROLE_ADMIN".equals(user.getRole()))) {
             globarService.addActivity(activity);
+            // 수정: System.out.println → log.info() 전환 (SLF4J 사용)
+            log.info("[활동 등록] 사용자: {}, 활동: {}", user.getUserId(), activity.getTitle());
             return ResponseEntity.ok(Map.of("message", "활동 등록 완료"));
         }
+        log.warn("[활동 등록 거부] 사용자: {}, 권한 부족: {}", user != null ? user.getUserId() : "null", user != null ? user.getRole() : "none");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "관리자 권한이 필요합니다."));
     }
 
