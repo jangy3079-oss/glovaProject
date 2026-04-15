@@ -6,9 +6,12 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource; // 👈 이거 임포트 필수!
+// 수정: @Slf4j 추가 - System.out.println과 e.printStackTrace() 대신 SLF4J 로거 사용
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 
+@Slf4j
 @Configuration
 public class FirebaseConfig {
 
@@ -25,11 +28,12 @@ public class FirebaseConfig {
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                System.out.println("🔥 Firebase 설정 성공!");
+                // 수정: System.out.println → log.info() 전환
+                log.info("[Firebase] 설정 성공");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("💥 Firebase 설정 실패 (파일을 찾을 수 없거나 키값 오류)");
+            // 수정: e.printStackTrace() + System.out.println → log.error() 전환
+            log.error("[Firebase] 설정 실패 (파일을 찾을 수 없거나 키값 오류)", e);
         }
     }
 }

@@ -76,7 +76,8 @@ public class GlobarServiceImpl implements GlobarService {
     public void addActivity(Activity activity) {
         // 1. DB에 활동 저장
         globarRepository.insertActivity(activity);
-        System.out.println("📌 [활동 신규 등록] ID: " + activity.getActNum() + ", 제목: " + activity.getTitle());
+        // 수정: System.out.println → log.info() 전환
+        log.info("[활동 신규 등록] ID: {}, 제목: {}", activity.getActNum(), activity.getTitle());
 
         // 2. 전체 알림 발송 (전용 메서드 호출)
         String title = "새로운 모임 알림";
