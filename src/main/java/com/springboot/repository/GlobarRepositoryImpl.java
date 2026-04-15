@@ -165,15 +165,16 @@ public class GlobarRepositoryImpl implements GlobarRepository {
         String sql = "INSERT INTO users (username, password, nickname, role, bio, language) " +
                      "VALUES (?, ?, ?, 'ROLE_USER', ?, ?)";
         try {
-            return jdbcTemplate.update(sql, 
-                user.getUsername(), 
-                user.getPassword(), 
-                user.getNickname(), 
-                user.getBio(), 
+            return jdbcTemplate.update(sql,
+                user.getUsername(),
+                user.getPassword(),
+                user.getNickname(),
+                user.getBio(),
                 user.getLanguage()
             );
         } catch (Exception e) {
-            e.printStackTrace();
+            // 수정: e.printStackTrace() → log.error() 전환 - 운영 환경에서 로그 레벨 제어 가능
+            log.error("[회원가입 DB 저장 오류] username={}: {}", user.getUsername(), e.getMessage(), e);
             return 0;
         }
     }

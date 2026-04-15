@@ -37,10 +37,18 @@ public class GlobarController {
 
     // 1. 로그인 API
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> payload, HttpServletResponse response) { 
+    public ResponseEntity<?> login(@RequestBody Map<String, String> payload, HttpServletResponse response) {
         String username = payload.get("username");
         String password = payload.get("password");
         String fcmToken = payload.get("fcmToken");
+
+        // 수정: 입력값 검증 추가 - null 체크 및 빈 문자열 검증
+        if (username == null || username.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "아이디를 입력해주세요."));
+        }
+        if (password == null || password.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "비밀번호를 입력해주세요."));
+        }
 
         User loginUser = globarService.login(username, password);
         if (loginUser != null) {
@@ -75,6 +83,17 @@ public class GlobarController {
     // 2. 회원가입 API
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+        // 수정: 입력값 검증 추가 - 필수 필드 검증
+        if (user == null || user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "아이디를 입력해주세요."));
+        }
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "비밀번호를 입력해주세요."));
+        }
+        if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "닉네임을 입력해주세요."));
+        }
+
         globarService.register(user);
         return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
     }
@@ -197,6 +216,17 @@ public class GlobarController {
         String username = payload.get("username");
         String nickname = payload.get("nickname");
         String newPassword = payload.get("newPassword");
+
+        // 수정: 입력값 검증 추가 - null 체크 및 빈 문자열 검증
+        if (username == null || username.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "아이디를 입력해주세요."));
+        }
+        if (nickname == null || nickname.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "닉네임을 입력해주세요."));
+        }
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "새 비밀번호를 입력해주세요."));
+        }
 
         boolean success = globarService.resetPassword(username, nickname, newPassword);
         if (success) {

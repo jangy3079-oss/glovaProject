@@ -3,11 +3,13 @@ package com.springboot.controller; // ✅ 1번 줄에 이거 추가
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springboot.domain.User;
 import com.springboot.service.GlobarService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,14 +22,18 @@ public class FcmController {
     private final GlobarService globarservice; // 유저 정보를 수정해야 하니까요
 
     @PostMapping("/token")
-    public ResponseEntity<String> saveToken(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> saveToken(@RequestBody Map<String, String> request,
+                                            @AuthenticationPrincipal User currentUser) {
+        // 수정: Spring Security로부터 인증된 사용자를 직접 주입받음
+        if (currentUser == null) {
+            return ResponseEntity.status(401).body("인증이 필요합니다");
+        }
+
         // 프론트에서 { "token": "..." } 이렇게 보낼 겁니다.
         String token = request.get("token");
-        
-        // ⚠️ 중요: 실제로는 '현재 로그인한 유저'의 ID를 가져와야 합니다.
-        // 시큐리티를 쓰고 계시다면 @AuthenticationPrincipal 등을 사용하세요.
-        // 여기서는 예시로 ID가 1번인 유저라고 가정하고 코드를 짭니다.
-        Long currentUserId = 1L; 
+
+        // 수정: 하드코딩된 ID 제거, 현재 로그인한 사용자의 ID 사용
+        Long currentUserId = currentUser.getUserId();
 
         globarservice.updateFcmToken(currentUserId, token);
 
