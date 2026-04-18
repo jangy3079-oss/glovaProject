@@ -7,7 +7,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,18 +21,20 @@ import com.springboot.service.GlobarService;
 import com.springboot.util.JwtUtil;
 
 // 수정: @Slf4j 추가 - System.out.println 대신 SLF4J 로거 사용으로 운영 환경 로그 레벨 제어 가능
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/Globar") // API 전용 경로로 변경 (프론트엔드 라우팅과 충돌 우려)
+// 수정: @Autowired 필드 주입 → @RequiredArgsConstructor 생성자 주입으로 변경
+//       이유: 필드 주입은 final 불가, 테스트 시 목(mock) 주입 어려움, 순환 의존성 감지 불가 등 문제 있음
+//       생성자 주입은 Spring 공식 권장 방식이며 금융권 코드 리뷰에서도 자주 지적되는 항목
+@RequiredArgsConstructor
 public class GlobarController {
 
-    @Autowired
-    private GlobarService globarService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final GlobarService globarService;
+    private final JwtUtil jwtUtil;
 
     // 1. 로그인 API
     @PostMapping("/login")
@@ -198,16 +199,22 @@ public class GlobarController {
     }
 
     // 11-1. 아이디 찾기 API
+    // 수정: 사용자명 열거 공격(username enumeration) 방지 - 존재 여부와 무관하게 동일한 200 응답 반환
+    //       기존에는 username을 직접 노출하거나 404로 존재 여부를 알 수 있었음
     @PostMapping("/find-id")
     public ResponseEntity<?> findId(@RequestBody Map<String, String> payload) {
         String nickname = payload.get("nickname");
         String username = globarService.findIdByNickname(nickname);
-        
-        if (username != null) {
-            return ResponseEntity.ok(Map.of("username", username));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "해당 닉네임으로 가입된 아이디가 없습니다."));
-        }
+
+        // 아이디가 존재하면 앞 두 글자만 노출하고 나머지는 * 마스킹 처리
+        String maskedUsername = (username != null && username.length() > 2)
+                ? username.substring(0, 2) + "*".repeat(username.length() - 2)
+                : null;
+
+        // 존재/미존재 모두 200으로 반환해 계정 열거 공격 차단
+        return ResponseEntity.ok(Map.of(
+                "message", maskedUsername != null ? "가입된 아이디: " + maskedUsername : "일치하는 계정 정보가 없습니다."
+        ));
     }
 
     // 11-2. 비밀번호 재설정 API

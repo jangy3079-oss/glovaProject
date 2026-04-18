@@ -23,7 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("https://glova.cloud", "https://www.glova.cloud", "http://localhost:5173", "http://127.0.0.1:5173") // 운영 도메인 및 리액트 개발포트 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
+                // 수정: allowedHeaders("*") → 필요한 헤더만 명시 (보안 강화: 임의 헤더 전송 차단)
+                .allowedHeaders("Content-Type", "Authorization", "X-Requested-With")
                 .allowCredentials(true) // 쿠키 포함 전송 허용
                 .maxAge(3600);
     }

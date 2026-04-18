@@ -34,7 +34,9 @@ ssh -i "$PEM_PATH" ubuntu@$SERVER_IP << EOF
     cd $PROJECT_PATH
     echo "▶️ 새 버전을 실행합니다: $JAR_NAME"
     chmod +x build/libs/$JAR_NAME
-    nohup java -jar build/libs/$JAR_NAME > spring.log 2>&1 &
+    # 본인의 진짜 시크릿코드(32자 이상)와 실제 AWS DB 비밀번호를 적어주세요.
+    nohup env JWT_SECRET=my_super_secret_key_for_globar_project_2026 DB_PASSWORD=sky_by114 java -jar build/libs/$JAR_NAME > spring.log 2>&1 &
+
     sleep 3
     echo "✨ 서버 재시작 완료!"
 EOF

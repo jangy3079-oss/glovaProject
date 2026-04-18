@@ -20,9 +20,16 @@ const FindAccount = () => {
     
     try {
       const response = await api.post('/find-id', { nickname });
-      setResult(`찾으시는 아이디는 [ ${response.data.username} ] 입니다.`);
+      const msg = response.data.message;
+      
+      // 메시지 내용에 따라 성공(Green)/실패(Red) 분기 처리
+      if (msg && msg.includes("일치하는")) {
+        setError(msg);
+      } else {
+        setResult(msg);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || '정보를 찾을 수 없습니다.');
+      setError(err.response?.data?.error || '정보를 조회하는 중 문제가 발생했습니다.');
     } finally {
       setLoading(false);
     }

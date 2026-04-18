@@ -63,7 +63,10 @@ public class GlobarServiceImpl implements GlobarService {
     @Transactional
     public boolean applyActivity(Long actNum, Long userId) {
         Activity activity = globarRepository.findActivityByNum(actNum);
-        
+        // 수정: null 체크 추가 - 존재하지 않는 actNum 전달 시 NPE 방지 (이슈 #9)
+        if (activity == null) {
+            throw new IllegalArgumentException("존재하지 않는 활동입니다. actNum=" + actNum);
+        }
         if (activity.getCurrentParticipants() < activity.getMaxParticipants()) {
             globarRepository.updateActivityCount(actNum);
             return true;

@@ -27,7 +27,6 @@ public class GlobarRepositoryImpl implements GlobarRepository {
     private final JdbcTemplate jdbcTemplate;
 
     // DB 결과셋(ResultSet)을 자바 User 객체로 변환하는 매퍼입니다.
- // DB 결과셋(ResultSet)을 자바 User 객체로 변환하는 매퍼입니다.
     private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
         User user = new User();
         user.setUserId(rs.getLong("user_id"));
@@ -125,24 +124,31 @@ public class GlobarRepositoryImpl implements GlobarRepository {
     }
 
     // 활동 번호로 해당 활동의 상세 정보를 조회합니다.
+    // 수정: EmptyResultDataAccessException 처리 추가 - 존재하지 않는 actNum 요청 시
+    //       queryForObject가 예외를 던지던 문제 수정 → null 반환으로 일관된 처리 보장
+    //       GlobarServiceImpl.applyActivity의 null 체크 로직과 정합성 확보
     @Override
     public Activity findActivityByNum(Long actNum) {
         String sql = "SELECT act_num, title, event_date, max_participants, current_participants, location, description " +
                      "FROM activities WHERE act_num = ?";
-        
-        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-            Activity act = new Activity();
-            act.setActNum(rs.getLong("act_num"));
-            act.setTitle(rs.getString("title"));
-            if (rs.getTimestamp("event_date") != null) {
-                act.setEventDate(rs.getTimestamp("event_date").toLocalDateTime());
-            }
-            act.setMaxParticipants(rs.getInt("max_participants"));
-            act.setCurrentParticipants(rs.getInt("current_participants"));
-            act.setLocation(rs.getString("location"));
-            act.setDescription(rs.getString("description"));
-            return act;
-        }, actNum);
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                Activity act = new Activity();
+                act.setActNum(rs.getLong("act_num"));
+                act.setTitle(rs.getString("title"));
+                if (rs.getTimestamp("event_date") != null) {
+                    act.setEventDate(rs.getTimestamp("event_date").toLocalDateTime());
+                }
+                act.setMaxParticipants(rs.getInt("max_participants"));
+                act.setCurrentParticipants(rs.getInt("current_participants"));
+                act.setLocation(rs.getString("location"));
+                act.setDescription(rs.getString("description"));
+                return act;
+            }, actNum);
+        } catch (EmptyResultDataAccessException e) {
+            // 해당 actNum의 활동이 DB에 없는 경우 null 반환 (서비스 레이어에서 IllegalArgumentException 처리)
+            return null;
+        }
     }
     
     // 새로운 활동을 DB에 등록합니다.
